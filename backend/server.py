@@ -23,6 +23,13 @@ from pydantic import BaseModel, Field
 import torch
 from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 
+# ==============================================================================
+# FOLDER MODEL CONFIGURATION
+# ==============================================================================
+CACHE_DIR = os.path.abspath("modelAI")
+os.makedirs(CACHE_DIR, exist_ok=True)
+os.environ["HF_HOME"] = CACHE_DIR  # Memastikan semua cache HuggingFace masuk ke modelAI
+
 # Environment configuration
 DEFAULT_API_KEY = os.getenv("LOCAL_API_KEY", "sk-local-gpu-hybrid-2026")
 PORT = int(os.getenv("PORT", 8000))
@@ -106,12 +113,16 @@ def load_pipeline():
         print("   Untuk mengaktifkan GPU NVIDIA, jalankan: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126")
 
     print(f"📦 Loading pre-trained model: {MODEL_ID}...")
+    print(f"📁 Model destination folder: {CACHE_DIR}")
+    
     try:
+        # Ditambahkan parameter cache_dir agar file tersimpan di folder modelAI
         pipe = StableDiffusionPipeline.from_pretrained(
             MODEL_ID,
             torch_dtype=dtype,
             safety_checker=None,
-            requires_safety_checker=False
+            requires_safety_checker=False,
+            cache_dir=CACHE_DIR
         )
         
         # Scheduler DPMSolverMultistepScheduler untuk inferensi cepat (20 steps sudah berkualitas tinggi)
